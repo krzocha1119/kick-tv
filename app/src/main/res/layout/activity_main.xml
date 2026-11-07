@@ -113,6 +113,27 @@
                         android:textStyle="bold" />
 
                     <Button
+                        android:id="@+id/btn_login"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="🔑 Zaloguj się (Log In)"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_teleport_top"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="↖ Kursor do menu górnego (Prawy górny róg)"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp" />
+
+                    <Button
                         android:id="@+id/btn_categories"
                         android:layout_width="match_parent"
                         android:layout_height="46dp"

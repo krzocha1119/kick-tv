@@ -42,6 +42,8 @@ public class MainActivity extends Activity {
 
     // Menu Buttons
     private Button btnHome;
+    private Button btnLogin;
+    private Button btnTeleportTop;
     private Button btnCategories;
     private Button btnGoChannel;
     private Button btnFavorites;
@@ -117,6 +119,18 @@ public class MainActivity extends Activity {
     }
 
     private void setupWebView() {
+        // Prevent WebView from capturing DPAD focus / caret navigation
+        webView.setFocusable(false);
+        webView.setFocusableInTouchMode(false);
+        webView.setLongClickable(false);
+        webView.setHapticFeedbackEnabled(false);
+        webView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true; // Disable text selection context menu
+            }
+        });
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -129,8 +143,13 @@ public class MainActivity extends Activity {
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
 
-        settings.setUserAgentString(USER_AGENT_DESKTOP);
+        // TV Performance Optimizations
+        settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setTextZoom(100);
+        settings.setGeolocationEnabled(false);
+
+        settings.setUserAgentString(USER_AGENT_DESKTOP);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 
         CookieManager cookieManager = CookieManager.getInstance();
@@ -190,8 +209,9 @@ public class MainActivity extends Activity {
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
+            public void onPageCommitVisible(WebView view, String url) {
+                super.onPageCommitVisible(view, url);
+                injectTvOptimizations();
             }
 
             @Override
@@ -211,23 +231,58 @@ public class MainActivity extends Activity {
     }
 
     private void injectTvOptimizations() {
+        String css =
+                "*, *::before, *::after {" +
+                "  -webkit-user-select: none !important;" +
+                "  user-select: none !important;" +
+                "  -webkit-touch-callout: none !important;" +
+                "  -webkit-tap-highlight-color: transparent !important;" +
+                "  outline: none !important;" +
+                "  box-shadow: none !important;" +
+                "  text-shadow: none !important;" +
+                "  backdrop-filter: none !important;" +
+                "  -webkit-backdrop-filter: none !important;" +
+                "}" +
+                "input, textarea {" +
+                "  -webkit-user-select: text !important;" +
+                "  user-select: text !important;" +
+                "}" +
+                "header, nav, [class*=\\\"header\\\"] {" +
+                "  backdrop-filter: none !important;" +
+                "  background-color: #0b0e0f !important;" +
+                "}" +
+                "div[class*=\\\"app-banner\\\"], div[class*=\\\"mobile-app\\\"], #onetrust-banner-sdk {" +
+                "  display: none !important;" +
+                "}" +
+                "video {" +
+                "  object-fit: contain !important;" +
+                "  transform: translateZ(0) !important;" +
+                "}";
+
         String js = "(function() {" +
                 "  try {" +
-                "    const bannerSelectors = ['#onetrust-accept-btn-handler', 'button[id*=\"accept\"]', 'button[class*=\"cookie\"]'];" +
-                "    for (const sel of bannerSelectors) {" +
-                "      const btn = document.querySelector(sel);" +
-                "      if (btn) { btn.click(); break; }" +
+                "    let style = document.getElementById('kick-tv-perf-style');" +
+                "    if (!style) {" +
+                "      style = document.createElement('style');" +
+                "      style.id = 'kick-tv-perf-style';" +
+                "      document.head.appendChild(style);" +
                 "    }" +
-                "    const style = document.createElement('style');" +
-                "    style.innerHTML = `div[class*=\"app-banner\"], div[class*=\"mobile-app\"] { display: none !important; } video { object-fit: contain !important; }`;" +
-                "    document.head.appendChild(style);" +
+                "    style.innerHTML = `" + css + "`;" +
+                "    const cookieBtns = ['#onetrust-accept-btn-handler', 'button[id*=\\\"accept\\\"]', 'button[class*=\\\"cookie\\\"]'];" +
+                "    for (const sel of cookieBtns) {" +
+                "      const b = document.querySelector(sel);" +
+                "      if (b) { b.click(); break; }" +
+                "    }" +
                 "  } catch(e) {}" +
                 "})();";
+
         webView.evaluateJavascript(js, null);
     }
 
     private void setupMenuButtons() {
         btnHome = findViewById(R.id.btn_home);
+        btnLogin = findViewById(R.id.btn_login);
+        btnTeleportTop = findViewById(R.id.btn_teleport_top);
         btnCategories = findViewById(R.id.btn_categories);
         btnGoChannel = findViewById(R.id.btn_go_channel);
         btnFavorites = findViewById(R.id.btn_favorites);
@@ -244,6 +299,24 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 webView.loadUrl(START_URL);
                 hideMenu();
+            }
+        });
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideMenu();
+                triggerLoginModal();
+            }
+        });
+
+        btnTeleportTop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideMenu();
+                // Move cursor to top-right corner where Log In and Sign Up buttons sit
+                cursorController.teleportTo(1750, 55);
+                Toast.makeText(MainActivity.this, "Kursor w prawym górnym rogu", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -440,72 +513,114 @@ public class MainActivity extends Activity {
         hideSystemUI();
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        // Menu trigger
-        if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_BOOKMARK || keyCode == KeyEvent.KEYCODE_INFO) {
-            toggleMenu();
-            return true;
-        }
+    private void triggerLoginModal() {
+        String js = "(function() {" +
+                "  try {" +
+                "    const selectors = [" +
+                "      'button[data-testid=\"login-button\"]'," +
+                "      'button[aria-label*=\"log in\" i]'," +
+                "      'button[aria-label*=\"zaloguj\" i]'," +
+                "      'a[href*=\"/login\"]'" +
+                "    ];" +
+                "    for (const sel of selectors) {" +
+                "      const el = document.querySelector(sel);" +
+                "      if (el) { el.click(); return true; }" +
+                "    }" +
+                "    const buttons = Array.from(document.querySelectorAll('button, a'));" +
+                "    const btn = buttons.find(b => {" +
+                "      const t = (b.textContent || '').trim().toLowerCase();" +
+                "      return t === 'log in' || t === 'zaloguj się' || t === 'sign in';" +
+                "    });" +
+                "    if (btn) { btn.click(); return true; }" +
+                "    window.location.href = 'https://kick.com/auth/login';" +
+                "  } catch(e) {}" +
+                "})();";
+        webView.evaluateJavascript(js, null);
+    }
 
-        // When menu overlay is open, use standard navigation
-        if (menuOverlay.getVisibility() == View.VISIBLE) {
-            if (keyCode == KeyEvent.KEYCODE_BACK) {
-                hideMenu();
-                return true;
+    private void handleBackPress() {
+        if (customVideoView != null) {
+            if (webView.getWebChromeClient() != null) {
+                webView.getWebChromeClient().onHideCustomView();
             }
-            return super.onKeyDown(keyCode, event);
+            return;
         }
-
-        // Multimedia remote buttons
-        if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
-                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY
-                || keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
-            webView.evaluateJavascript("(function(){ const v = document.querySelector('video'); if (v) { if (v.paused) v.play(); else v.pause(); } })();", null);
-            return true;
+        if (webView.canGoBack()) {
+            webView.goBack();
+            return;
         }
-
-        // Back button navigation
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (customVideoView != null) {
-                if (webView.getWebChromeClient() != null) {
-                    webView.getWebChromeClient().onHideCustomView();
-                }
-                return true;
-            }
-            if (webView.canGoBack()) {
-                webView.goBack();
-                return true;
-            }
-            // Double back to exit
-            long now = System.currentTimeMillis();
-            if (now - lastBackPressTime < 2500) {
-                finish();
-                return true;
-            } else {
-                lastBackPressTime = now;
-                Toast.makeText(this, "Naciśnij WSTECZ ponownie lub MENU aby otworzyć opcje", Toast.LENGTH_SHORT).show();
-                return true;
-            }
+        long now = System.currentTimeMillis();
+        if (now - lastBackPressTime < 2500) {
+            finish();
+        } else {
+            lastBackPressTime = now;
+            Toast.makeText(this, "Naciśnij WSTECZ ponownie lub MENU aby otworzyć opcje", Toast.LENGTH_SHORT).show();
         }
-
-        // Delegate to Virtual Cursor Controller
-        if (cursorController.onKeyDown(keyCode, event)) {
-            return true;
-        }
-
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (menuOverlay.getVisibility() == View.VISIBLE) {
-            return super.onKeyUp(keyCode, event);
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        // When menu overlay is open, allow standard focus traversal inside the menu card
+        if (menuOverlay != null && menuOverlay.getVisibility() == View.VISIBLE) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+                hideMenu();
+                return true;
+            }
+            return super.dispatchKeyEvent(event);
         }
-        if (cursorController.onKeyUp(keyCode, event)) {
+
+        int keyCode = event.getKeyCode();
+        int action = event.getAction();
+
+        // Menu trigger
+        if (keyCode == KeyEvent.KEYCODE_MENU || keyCode == KeyEvent.KEYCODE_BOOKMARK || keyCode == KeyEvent.KEYCODE_INFO) {
+            if (action == KeyEvent.ACTION_DOWN) {
+                toggleMenu();
+            }
             return true;
         }
-        return super.onKeyUp(keyCode, event);
+
+        // Multimedia controls
+        if (keyCode == KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PLAY
+                || keyCode == KeyEvent.KEYCODE_MEDIA_PAUSE) {
+            if (action == KeyEvent.ACTION_DOWN) {
+                webView.evaluateJavascript("(function(){ const v = document.querySelector('video'); if (v) { if (v.paused) v.play(); else v.pause(); } })();", null);
+            }
+            return true;
+        }
+
+        // Back button
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (action == KeyEvent.ACTION_DOWN) {
+                handleBackPress();
+            }
+            return true;
+        }
+
+        // Intercept all DPAD & Enter keys so WebView NEVER performs spatial caret / text selection
+        if (cursorController != null && cursorController.isEnabled()) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_DPAD_UP:
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                case KeyEvent.KEYCODE_DPAD_LEFT:
+                case KeyEvent.KEYCODE_DPAD_RIGHT:
+                case KeyEvent.KEYCODE_DPAD_CENTER:
+                case KeyEvent.KEYCODE_ENTER:
+                case KeyEvent.KEYCODE_PAGE_UP:
+                case KeyEvent.KEYCODE_PAGE_DOWN:
+                case KeyEvent.KEYCODE_CHANNEL_UP:
+                case KeyEvent.KEYCODE_CHANNEL_DOWN:
+                    if (action == KeyEvent.ACTION_DOWN) {
+                        return cursorController.onKeyDown(keyCode, event);
+                    } else if (action == KeyEvent.ACTION_UP) {
+                        return cursorController.onKeyUp(keyCode, event);
+                    }
+                    return true;
+            }
+        }
+
+        return super.dispatchKeyEvent(event);
     }
 
     @Override
