@@ -76,6 +76,13 @@ public class VirtualCursorController {
         }
     }
 
+    public void teleportTo(float x, float y) {
+        cursorX = Math.max(0, Math.min(x, screenWidth - 1));
+        cursorY = Math.max(0, Math.min(y, screenHeight - 1));
+        updateViewPosition();
+        showCursor();
+    }
+
     public boolean isEnabled() {
         return isEnabled;
     }
@@ -130,44 +137,53 @@ public class VirtualCursorController {
             return false;
         }
 
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER) {
-            return true;
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_DPAD_UP:
+            case KeyEvent.KEYCODE_DPAD_DOWN:
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+            case KeyEvent.KEYCODE_DPAD_CENTER:
+            case KeyEvent.KEYCODE_ENTER:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     private void handleDpadMove(int keyCode, int repeatCount) {
         showCursor();
 
-        // Progressive acceleration: precision tapping (14px) vs holding down (up to 42px)
-        float step = 14f + Math.min(repeatCount * 4f, 28f);
+        // Progressive acceleration: precision tapping (16px) vs holding down (up to 50px)
+        float step = 16f + Math.min(repeatCount * 5f, 34f);
 
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_UP:
                 cursorY -= step;
-                if (cursorY <= 15) {
-                    webView.scrollBy(0, -(int) (step * 2.5f));
+                if (cursorY < 0) {
+                    cursorY = 0;
+                    if (webView.canScrollVertically(-1)) {
+                        webView.scrollBy(0, -(int) (step * 2.2f));
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_DOWN:
                 cursorY += step;
-                if (cursorY >= screenHeight - 35) {
-                    webView.scrollBy(0, (int) (step * 2.5f));
+                if (cursorY >= screenHeight - 1) {
+                    cursorY = screenHeight - 1;
+                    if (webView.canScrollVertically(1)) {
+                        webView.scrollBy(0, (int) (step * 2.2f));
+                    }
                 }
                 break;
             case KeyEvent.KEYCODE_DPAD_LEFT:
                 cursorX -= step;
+                if (cursorX < 0) cursorX = 0;
                 break;
             case KeyEvent.KEYCODE_DPAD_RIGHT:
                 cursorX += step;
+                if (cursorX >= screenWidth) cursorX = screenWidth - 1;
                 break;
         }
-
-        // Clamp to screen bounds
-        if (cursorX < 0) cursorX = 0;
-        if (cursorX >= screenWidth) cursorX = screenWidth - 1;
-        if (cursorY < 0) cursorY = 0;
-        if (cursorY >= screenHeight) cursorY = screenHeight - 1;
 
         updateViewPosition();
     }
