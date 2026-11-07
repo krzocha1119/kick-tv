@@ -118,18 +118,18 @@
                         android:layout_height="46dp"
                         android:layout_marginBottom="8dp"
                         android:background="@drawable/bg_menu_button"
-                        android:text="🔑 Zaloguj się (Log In)"
+                        android:text="🔑 Otwórz okno logowania Kick"
                         android:textColor="@color/btn_text_color"
                         android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <Button
-                        android:id="@+id/btn_teleport_top"
+                        android:id="@+id/btn_direct_login"
                         android:layout_width="match_parent"
                         android:layout_height="46dp"
                         android:layout_marginBottom="8dp"
                         android:background="@drawable/bg_menu_button"
-                        android:text="↖ Kursor do menu górnego (Prawy górny róg)"
+                        android:text="⌨️ Wpisz Login i Hasło (Dialog TV)"
                         android:textColor="@color/btn_text_color"
                         android:textSize="15sp" />
 
@@ -183,7 +183,7 @@
                         android:layout_height="46dp"
                         android:layout_marginBottom="8dp"
                         android:background="@drawable/bg_menu_button"
-                        android:text="Wskaźnik myszy: WŁĄCZONY"
+                        android:text="Tryb sterowania: Kafelki TV (Zalecane)"
                         android:textColor="@color/btn_text_color"
                         android:textSize="15sp"
                         android:textStyle="bold" />
