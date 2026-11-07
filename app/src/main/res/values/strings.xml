@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kick TV</string>
+    <string name="menu_home">Strona główna</string>
+    <string name="menu_categories">Kategorie</string>
+    <string name="menu_favorites">Ulubione</string>
+    <string name="menu_channel">Wpisz kanał</string>
+    <string name="menu_reload">Odśwież stronę</string>
+    <string name="menu_mouse">Tryb wskaźnika</string>
+    <string name="menu_close">Zamknij menu</string>
+    <string name="menu_exit">Wyjdź z aplikacji</string>
+</resources>

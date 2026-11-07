@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0E0F"
+    android:keepScreenOn="true">
+
+    <!-- Primary Chromium WebView -->
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
+
+    <!-- Container for HTML5 Fullscreen Video (WebChromeClient) -->
+    <FrameLayout
+        android:id="@+id/fullscreen_custom_view_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="gone" />
+
+    <!-- Top Loading Progress Bar -->
+    <ProgressBar
+        android:id="@+id/loading_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_gravity="top"
+        android:indeterminate="false"
+        android:max="100"
+        android:progress="0"
+        android:visibility="gone" />
+
+    <!-- Floating Virtual Mouse Pointer Cursor -->
+    <ImageView
+        android:id="@+id/cursor_view"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/cursor_pointer"
+        android:visibility="gone" />
+
+    <!-- Quick TV Menu / Overlay -->
+    <FrameLayout
+        android:id="@+id/menu_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="440dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_menu_card"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- Title Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingBottom="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#53FC18"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="KICK"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="8dp"
+                    android:text="TV MENU"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fadeScrollbars="false"
+                android:scrollbars="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <Button
+                        android:id="@+id/btn_home"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Strona główna (kick.com)"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_categories"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Przeglądaj kategorie"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_go_channel"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Przejdź do kanału (wpisz nick)"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_favorites"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="⭐ Ulubione kanały"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_add_fav"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="+ Dodaj obecny kanał do ulubionych"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_toggle_mouse"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Wskaźnik myszy: WŁĄCZONY"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_toggle_chat"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Przełącz czat (pokaż/ukryj)"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_fullscreen_video"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Maksymalizuj wideo (Teatr)"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_reload"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Odśwież stronę"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btn_close_menu"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Zamknij menu"
+                        android:textColor="@color/btn_text_color"
+                        android:textSize="15sp" />
+
+                    <Button
+                        android:id="@+id/btn_exit_app"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:background="@drawable/bg_menu_button"
+                        android:text="Wyjdź z aplikacji"
+                        android:textColor="#FF5555"
+                        android:textSize="15sp" />
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+    </FrameLayout>
+
+</FrameLayout>

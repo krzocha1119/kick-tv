@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="kick_green">#53FC18</color>
+    <color name="kick_green_dark">#3EBD12</color>
+    <color name="kick_black">#0B0E0F</color>
+    <color name="kick_card_bg">#181C1E</color>
+    <color name="kick_text_primary">#FFFFFF</color>
+    <color name="kick_text_secondary">#9EABB2</color>
+    <color name="overlay_dim">#CC000000</color>
+</resources>
